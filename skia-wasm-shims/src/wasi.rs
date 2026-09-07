@@ -172,6 +172,7 @@ pub unsafe extern "C" fn __imported_wasi_snapshot_preview1_path_filestat_get(
     _fd: __wasi_fd_t,
     _flags: __wasi_lookupflags_t,
     _path: *const c_char,
+    _path_len: __wasi_size_t,
     _retptr0: *mut c_void,
 ) -> __wasi_errno_t {
     WASI_BADF
@@ -182,6 +183,7 @@ pub unsafe extern "C" fn __imported_wasi_snapshot_preview1_path_open(
     _fd: __wasi_fd_t,
     _dirflags: __wasi_lookupflags_t,
     _path: *const c_char,
+    _path_len: __wasi_size_t,
     _oflags: __wasi_oflags_t,
     _fs_rights_base: __wasi_rights_t,
     _fs_rights_inheriting: __wasi_rights_t,

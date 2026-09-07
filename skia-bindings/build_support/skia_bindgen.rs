@@ -516,6 +516,9 @@ const BLOCKLISTED_TYPES: &[&str] = &[
     // m115 unused Linux
     "std::__uset_hashtable.*",
     "std::unordered_set.*",
+    // WASI SDK libc++ (no inline namespace, e.g. wasm32-unknown-unknown):
+    "std::__hash.*",
+    "std::__bucket_list.*",
     // m115 unused Windows
     "std::_List_unchecked.*",
     "std::_Hash.*",
