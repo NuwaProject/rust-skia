@@ -1,9 +1,26 @@
 use skia_safe::{Color, Paint, PaintStyle};
-use wasm_bindgen::{prelude::*, JsCast};
+use wasm_bindgen::prelude::*;
+use wasm_bindgen::JsCast;
 #[cfg(feature = "gl")]
 use web_sys::WebGl2RenderingContext;
 #[cfg(not(feature = "gl"))]
 use web_sys::{CanvasRenderingContext2d, ImageData};
+
+unsafe extern "C" {
+    /// Linker-synthesized by wasm-ld: runs all C++ static constructors.
+    ///
+    /// Calling it from a regular object tells lld that constructors are taken
+    /// care of, which suppresses the per-export `.command_export` wrappers
+    /// that would otherwise re-run C++ static ctors/dtors on every call.
+    fn __wasm_call_ctors();
+}
+
+/// Runs all C++ static constructors exactly once. Must be called from JS
+/// right after `init()` — see web/main.js.
+#[unsafe(no_mangle)]
+pub extern "C" fn skia_run_static_ctors() {
+    unsafe { __wasm_call_ctors() };
+}
 
 #[cfg(feature = "gl")]
 use skia_safe::{

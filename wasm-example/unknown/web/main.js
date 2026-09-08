@@ -12,7 +12,12 @@ function resizeCanvas(canvas) {
 }
 
 async function main() {
-  await init();
+  const wasm = await init();
+  // Run Skia's C++ static constructors exactly once, before any wasm entry
+  // point touches them. Referencing __wasm_call_ctors from Rust also tells
+  // wasm-ld not to wrap every export in ctors/dtors (new-style command
+  // support), which would corrupt heap state on every call.
+  wasm.skia_run_static_ctors();
 
   const canvas = document.getElementById("glcanvas");
   resizeCanvas(canvas);
