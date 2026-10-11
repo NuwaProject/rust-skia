@@ -99,6 +99,17 @@ impl PlatformDetails for WasmUnknown {
         std::env::set_var(format!("CC_{target_var}"), &clang);
         std::env::set_var(format!("CXX_{target_var}"), &clangxx);
         std::env::set_var(format!("AR_{target_var}"), &ar);
+        // Skia's own C++ gets `-fno-exceptions` from the GN default config,
+        // but shim sources compiled via the `cc` crate don't. With exceptions
+        // enabled, libc++ headers inline `__cxa_throw` calls (e.g. from
+        // `std::optional::value()`), and WASI's libc++abi provides no such
+        // symbols, so final binaries retaining those sections fail to link
+        // (see wasm32-link-exceptions.md).
+        let cxxflags = match cargo::env_var("CXXFLAGS") {
+            Some(flags) => format!("{flags} -fno-exceptions"),
+            None => "-fno-exceptions".to_string(),
+        };
+        std::env::set_var("CXXFLAGS", &cxxflags);
     }
 
     fn prepare_build_support(&self, output_directory: &Path) {

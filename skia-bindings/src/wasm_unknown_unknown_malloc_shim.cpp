@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <new>
+#include <unistd.h>
 
 extern "C" void* skia_bindings_alloc(size_t size, size_t align);
 extern "C" void* skia_bindings_alloc_zeroed(size_t size, size_t align);
@@ -285,6 +286,37 @@ std::size_t malloc_usable_size(void* ptr) {
     }
     AllocHeader* header = header_from_ptr(ptr);
     return header->total_size - static_cast<std::size_t>(reinterpret_cast<uintptr_t>(ptr) - header->base_ptr);
+}
+
+}  // extern "C"
+
+// -----------------------------------------------------------------------------
+// C++ exception ABI stubs.
+//
+// wasi-sdk ships its libc++abi with exception support disabled, so nothing in
+// the WASI libc set defines `__cxa_throw` / `__cxa_allocate_exception`. C++
+// objects still reference them from retained sections (C++ headers with
+// `throw` statements, e.g. `std::optional::value()`), which breaks linking of
+// every final binary that keeps those sections alive — while builds that GC
+// them away link fine, hiding the gap.
+//
+// There is no unwinder on this target, so a thrown C++ exception could not be
+// recovered anyway: allocation hands out a malloc block (so the caller's
+// construction stays memory-safe up to the throw) and throwing aborts, like
+// `trap_out_of_memory` above.
+// -----------------------------------------------------------------------------
+extern "C" {
+
+void* __cxa_allocate_exception(std::size_t thrown_size) {
+    return thrown_size == 0 ? nullptr : malloc(thrown_size);
+}
+
+[[noreturn]] void __cxa_throw(void* thrown_exception, void* type_info, void (*destructor)(void*)) {
+    (void)thrown_exception;
+    (void)type_info;
+    (void)destructor;
+    write(2, "malloc-shim: __cxa_throw reached\n", 33);
+    abort();
 }
 
 }  // extern "C"
