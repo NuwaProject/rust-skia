@@ -54,5 +54,12 @@ publish-binaries target="wasm32-unknown-unknown" features="":
 
 # Publishes binaries for both consumers: linux-amd64 and wasm32-unknown-unknown.
 publish-binaries-linux-wasm32:
-    just publish-binaries x86_64-unknown-linux-gnu
-    just publish-binaries wasm32-unknown-unknown gl,pdf,textlayout
+    just publish-binaries x86_64-unknown-linux-gnu gl
+    just publish-binaries x86_64-unknown-linux-gnu gl,textlayout
+    just publish-binaries x86_64-unknown-linux-gnu gl,svg,textlayout
+    just publish-binaries x86_64-unknown-linux-gnu gl,pdf,svg,textlayout
+    just publish-binaries x86_64-unknown-linux-gnu gl,svg,textlayout,vulkan
+    just publish-binaries wasm32-unknown-unknown gl
+    just publish-binaries wasm32-unknown-unknown gl,textlayout
+    just publish-binaries wasm32-unknown-unknown gl,svg,textlayout
+    just publish-binaries wasm32-unknown-unknown gl,pdf,svg,textlayout
