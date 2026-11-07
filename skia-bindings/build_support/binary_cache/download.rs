@@ -188,6 +188,14 @@ fn should_try_download_binaries(
         return Some((tag, config.key(&half_hash)));
     }
 
+    // Cargo git-dependency checkouts are git repositories, but carry no
+    // `.cargo_vcs_info.json`, which only `cargo package` writes. Recover the
+    // commit from the checkout itself, so that git dependencies can hit the
+    // binaries published for the very same commit.
+    if let Some(half_hash) = git::half_hash() {
+        return Some((tag, config.key(&half_hash)));
+    }
+
     None
 }
 
